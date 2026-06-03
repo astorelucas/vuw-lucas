@@ -41,6 +41,12 @@ LinearRegression <- lm(
 )
 summary(LinearRegression)
 
+LinearRegression_p <- lm(
+  spearman_abs ~ dist_km + pearson_abs,
+  data = data
+)
+summary(LinearRegression_p)
+
 # STEPWISE LM — AIC, ambas as direções
 
 full_model <- lm(
