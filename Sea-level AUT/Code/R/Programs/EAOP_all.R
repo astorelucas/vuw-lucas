@@ -1,7 +1,10 @@
+library(readxl)
 library(StatOrdPattHxC)
 library(ggplot2)
 library(ggthemes)
 library(ggrepel)
+
+sea_level_multistation <- read_csv("~/Library/CloudStorage/OneDrive-VictoriaUniversityofWellington-STAFF/Documents/Alunos/Lucas Malacarne Astore/Git Repository/Sea-level AUT/Dataset/sea_level_multistation.csv")
 
 ## For emb = 3,4,6
 
@@ -149,3 +152,11 @@ ggplot(dim6, aes(x=H, y=C)) +
         axis.title=element_text(size=11))
 
 
+### De Alejandro
+
+attach(sea_level_multistation)
+GIST <- GIST[!is.na(GIST)]
+OPGist6 <- OPseq(GIST, emb=6)
+OPprobGIST6 <- OPGist6 / sum(OPGist6)
+HShannon(OPprobGIST6)
+StatComplexity(OPprobGIST6)
