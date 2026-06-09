@@ -1,12 +1,9 @@
-library(readxl)
 library(StatOrdPattHxC)
 library(ggplot2)
 library(ggthemes)
 library(ggrepel)
 
-sea_level_multistation <- read_csv("Sea-level AUT/Dataset/sea_level_multistation.csv", show_col_types = FALSE)
-
-## For emb = 3,4,6
+## For emb = 3,4,5,6
 
 attach(sea_level_multistation)
 stations <- c("AUCT", "CHIT", "CHST", "CPIT", "GBIT", "GIST", "JBTT", "KAIT", 
@@ -34,26 +31,26 @@ names(dim3) <- c("H", "C")
 rownames(dim3) <- stations
 
 ggplot(dim3, aes(x=H, y=C)) +
+  # Boundary lines
   geom_line(data=subset(LinfLsup, Dimension==3 & Side=="Lower"), 
-            aes(x=H, y=C), color="grey40", linewidth=0.6, linetype="dashed",
-            inherit.aes=FALSE) +
+            aes(x=H, y=C), color="grey40", linewidth=0.6, linetype="dashed") +
   geom_line(data=subset(LinfLsup, Dimension==3 & Side=="Upper"), 
-            aes(x=H, y=C), color="grey40", linewidth=0.6,
-            inherit.aes=FALSE) +
-  geom_point(aes(color=stations), size=3, alpha=0.85) +
-  geom_text_repel(aes(label=stations, color=stations),
+            aes(x=H, y=C), color="grey40", linewidth=0.6) +
+  # Points
+  geom_point(aes(color=rownames(dim3)), size=3, alpha=0.85) +
+  # Labels
+  geom_text_repel(aes(label=rownames(dim3), color=rownames(dim3)),
                   size=3,
                   fontface="bold",
-                  max.overlaps=Inf,
-                  box.padding=0.4,
+                  max.overlaps=20,
+                  box.padding=0.5,
                   point.padding=0.3,
                   segment.color="grey60",
                   segment.size=0.4,
-                  seed=42) +
-  scale_color_manual(values=colorRampPalette(
-    c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
-  scale_x_continuous(limits=c(0.0, 1)) +
-  scale_y_continuous(limits=c(0.0, 0.35)) +
+                  min.segment.length=0.2) +
+  # Zoom into the cluster area with some padding
+  coord_cartesian(xlim=c(0.0, 0.85), ylim=c(0.0, 0.5)) +
+  scale_color_manual(values=colorRampPalette(c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
   labs(title="HxC Complexity-Entropy Plane",
        subtitle="Sea level stations — Embedding dimension 3",
        x="Permutation Entropy (H)",
@@ -63,7 +60,6 @@ ggplot(dim3, aes(x=H, y=C)) +
         plot.title=element_text(face="bold", size=13),
         plot.subtitle=element_text(color="grey40", size=10),
         axis.title=element_text(size=11))
-
 
 ### Embedding = 4
 
@@ -93,75 +89,13 @@ ggplot(dim4, aes(x=H, y=C)) +
             aes(x=H, y=C), color="grey40", linewidth=0.6,
             inherit.aes=FALSE) +
   geom_point(aes(color=stations), size=3, alpha=0.85) +
-  geom_text_repel(aes(label=stations, color=stations),
-                  size=3,
-                  fontface="bold",
-                  max.overlaps=Inf,
-                  box.padding=0.4,
-                  point.padding=0.3,
-                  segment.color="grey60",
-                  segment.size=0.4,
-                  seed=42) +
+  # reproducible label placement
   scale_color_manual(values=colorRampPalette(
     c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
   scale_x_continuous(limits=c(0.0, 1)) +
   scale_y_continuous(limits=c(0.0, 0.35)) +
   labs(title="HxC Complexity-Entropy Plane",
-       subtitle="Sea level stations — Embedding dimension 4",
-       x="Permutation Entropy (H)",
-       y="Statistical Complexity (C)") +
-  theme_tufte() +
-  theme(legend.position="none",
-        plot.title=element_text(face="bold", size=13),
-        plot.subtitle=element_text(color="grey40", size=10),
-        axis.title=element_text(size=11))
-
-### Embedding = 5
-
-results_list5 <- list()
-
-for (stn in stations) {
-  print(stn)
-  x <- sea_level_multistation[[stn]]
-  x <- x[!is.na(x)]
-  
-  OrdinalPatterns <- OPseq(x, emb = 5)
-  OrdinalPatternsProbabilities <- OrdinalPatterns / sum(OrdinalPatterns)
-  OrdinalPatternsProbabilities <- OrdinalPatternsProbabilities - .Machine$double.eps^0.5
-  h <- HShannon(OrdinalPatternsProbabilities)
-  c <- StatComplexity(OrdinalPatternsProbabilities)
-  results_list5[[stn]] <- c(h, c)
-}
-
-
-dim5 <- do.call(rbind, results_list5)
-dim5 <- data.frame(dim5)
-names(dim5) <- c("H", "C")
-rownames(dim5) <- stations
-
-ggplot(dim5, aes(x=H, y=C)) +
-  geom_line(data=subset(LinfLsup, Dimension==5 & Side=="Lower"), 
-            aes(x=H, y=C), color="grey40", linewidth=0.6, linetype="dashed",
-            inherit.aes=FALSE) +
-  geom_line(data=subset(LinfLsup, Dimension==5 & Side=="Upper"), 
-            aes(x=H, y=C), color="grey40", linewidth=0.6,
-            inherit.aes=FALSE) +
-  geom_point(aes(color=stations), size=3, alpha=0.85) +
-  geom_text_repel(aes(label=stations, color=stations),
-                  size=3,
-                  fontface="bold",
-                  max.overlaps=Inf,
-                  box.padding=0.4,
-                  point.padding=0.3,
-                  segment.color="grey60",
-                  segment.size=0.4,
-                  seed=42) +
-  scale_color_manual(values=colorRampPalette(
-    c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
-  scale_x_continuous(limits=c(0.0, 1)) +
-  scale_y_continuous(limits=c(0.0, 0.35)) +
-  labs(title="HxC Complexity-Entropy Plane",
-       subtitle="Sea level stations — Embedding dimension 5",
+       subtitle="Sea level stations — Embedding dimension 3",
        x="Permutation Entropy (H)",
        y="Statistical Complexity (C)") +
   theme_tufte() +
@@ -176,18 +110,15 @@ ggplot(dim5, aes(x=H, y=C)) +
 results_list6 <- list()
 
 for (stn in stations) {
-  print(stn)
   x <- sea_level_multistation[[stn]]
   x <- x[!is.na(x)]
   
   OrdinalPatterns <- OPseq(x, emb = 6)
-  OrdinalPatternsProbabilities <- OrdinalPatterns / sum(OrdinalPatterns)
-  OrdinalPatternsProbabilities <- OrdinalPatternsProbabilities - .Machine$double.eps^0.5
-  h <- HShannon(OrdinalPatternsProbabilities)
-  c <- StatComplexity(OrdinalPatternsProbabilities)
-  results_list6[[stn]] <- c(h, c)
+  OrdinalPatternsProbabilities <- OPprob(x, emb = 6)
+  
+  results_list6[[stn]] <- c(HShannon(OrdinalPatternsProbabilities), 
+                            StatComplexity(OrdinalPatternsProbabilities))
 }
-
 
 dim6 <- do.call(rbind, results_list6)
 dim6 <- data.frame(dim6)
@@ -202,15 +133,7 @@ ggplot(dim6, aes(x=H, y=C)) +
             aes(x=H, y=C), color="grey40", linewidth=0.6,
             inherit.aes=FALSE) +
   geom_point(aes(color=stations), size=3, alpha=0.85) +
-  geom_text_repel(aes(label=stations, color=stations),
-                  size=3,
-                  fontface="bold",
-                  max.overlaps=Inf,
-                  box.padding=0.4,
-                  point.padding=0.3,
-                  segment.color="grey60",
-                  segment.size=0.4,
-                  seed=42) +
+  # reproducible label placement
   scale_color_manual(values=colorRampPalette(
     c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
   scale_x_continuous(limits=c(0.0, 1)) +
@@ -224,4 +147,5 @@ ggplot(dim6, aes(x=H, y=C)) +
         plot.title=element_text(face="bold", size=13),
         plot.subtitle=element_text(color="grey40", size=10),
         axis.title=element_text(size=11))
+
 
