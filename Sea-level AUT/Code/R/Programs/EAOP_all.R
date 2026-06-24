@@ -125,9 +125,8 @@ for (stn in stations) {
   x <- sea_level_multistation[[stn]]
   x <- x[!is.na(x)]
   
-  OrdinalPatterns <- OPseq(x, emb = 5)
-  OrdinalPatternsProbabilities <- OrdinalPatterns / sum(OrdinalPatterns)
-  OrdinalPatternsProbabilities <- OrdinalPatternsProbabilities - .Machine$double.eps^0.5
+  OrdinalPatternsProbabilities <- OPprob(x, emb = 5)
+  OrdinalPatternsProbabilities <- OrdinalPatternsProbabilities / sum(OrdinalPatternsProbabilities)  
   h <- HShannon(OrdinalPatternsProbabilities)
   c <- StatComplexity(OrdinalPatternsProbabilities)
   results_list5[[stn]] <- c(h, c)
@@ -158,8 +157,8 @@ ggplot(dim5, aes(x=H, y=C)) +
                   seed=42) +
   scale_color_manual(values=colorRampPalette(
     c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
-  scale_x_continuous(limits=c(0.0, 1)) +
-  scale_y_continuous(limits=c(0.0, 0.35)) +
+  scale_x_continuous(limits=c(min(dim5$H), max(dim5$H))) +
+  scale_y_continuous(limits=c(0.3, 0.4)) +
   labs(title="HxC Complexity-Entropy Plane",
        subtitle="Sea level stations — Embedding dimension 5",
        x="Permutation Entropy (H)",
@@ -180,9 +179,8 @@ for (stn in stations) {
   x <- sea_level_multistation[[stn]]
   x <- x[!is.na(x)]
   
-  OrdinalPatterns <- OPseq(x, emb = 6)
-  OrdinalPatternsProbabilities <- OrdinalPatterns / sum(OrdinalPatterns)
-  OrdinalPatternsProbabilities <- OrdinalPatternsProbabilities - .Machine$double.eps^0.5
+  OrdinalPatternsProbabilities <- OPprob(x, emb = 6)
+  OrdinalPatternsProbabilities <- OrdinalPatternsProbabilities / sum(OrdinalPatternsProbabilities)  
   h <- HShannon(OrdinalPatternsProbabilities)
   c <- StatComplexity(OrdinalPatternsProbabilities)
   results_list6[[stn]] <- c(h, c)
@@ -202,19 +200,10 @@ ggplot(dim6, aes(x=H, y=C)) +
             aes(x=H, y=C), color="grey40", linewidth=0.6,
             inherit.aes=FALSE) +
   geom_point(aes(color=stations), size=3, alpha=0.85) +
-  geom_text_repel(aes(label=stations, color=stations),
-                  size=3,
-                  fontface="bold",
-                  max.overlaps=Inf,
-                  box.padding=0.4,
-                  point.padding=0.3,
-                  segment.color="grey60",
-                  segment.size=0.4,
-                  seed=42) +
   scale_color_manual(values=colorRampPalette(
     c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D"))(20)) +
-  scale_x_continuous(limits=c(0.0, 1)) +
-  scale_y_continuous(limits=c(0.0, 0.35)) +
+  scale_x_continuous(limits=c(0., 1)) +
+  scale_y_continuous(limits=c(0, 1)) +
   labs(title="HxC Complexity-Entropy Plane",
        subtitle="Sea level stations — Embedding dimension 6",
        x="Permutation Entropy (H)",

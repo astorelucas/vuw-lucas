@@ -36,8 +36,8 @@ ggplot(dim3, aes(x=H, y=C)) +
 
 ### Embedding = 6
 
-OrdinalPatterns <- OPseq(AUCT[!is.na(AUCT)], emb = 6)
-OrdinalPatternsProbabilities <- OPprob(AUCT[!is.na(AUCT)], emb = 6)
+OrdinalPatterns <- OPseq(WLGT[!is.na(WLGT)], emb = 6)
+OrdinalPatternsProbabilities <- OPprob(WLGT[!is.na(WLGT)], emb = 6)
 HC_AUCT_6 <- c(HShannon(OrdinalPatternsProbabilities), StatComplexity(OrdinalPatternsProbabilities))
 
 OrdinalPatterns <- OPseq(PUYT[!is.na(PUYT)], emb = 6)
@@ -52,7 +52,7 @@ OrdinalPatterns <- OPseq(NAPT[!is.na(NAPT)], emb = 6)
 OrdinalPatternsProbabilities <- OPprob(NAPT[!is.na(NAPT)], emb = 6)
 HC_NAPT_6 <- c(HShannon(OrdinalPatternsProbabilities), StatComplexity(OrdinalPatternsProbabilities))
 
-dim6 <- rbind(HC_AUCT_6, HC_NAPT_6, HC_RFRT_6, HC_PUYT_6)
+dim6 <- rbind(HC_AUCT_6)
 dim6 <- data.frame(dim6)
 names(dim6) <- c("H", "C")
 
