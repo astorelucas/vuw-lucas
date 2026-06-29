@@ -146,9 +146,9 @@ run_gol_hxc_analysis <- function(seed, k, T, emb, window_size = 4, stride = 4) {
 # ============================================================
 
 results <- run_gol_hxc_analysis(
-  seed = 42,
+  seed = 123456789,
   k    = 8,    # 2^8 = 256x256 grid
-  T    = 50,
+  T    = 2999,
   emb  = 3     # embedding dimension passed to OPprob()
 )
 
@@ -168,26 +168,31 @@ library(ggrepel)
 library(ggthemes)
 
 hc_df$epoch <- factor(hc_df$epoch)  # discrete labels/colors, one per epoch
+hc_df$H <- as.numeric(hc_df$H)
+hc_df$C <- as.numeric(hc_df$C)
+# ACF Acrescentar: remover linhas em que H ou C são NA
 
 emb_used <- 3  # set to whatever 'emb' you used above, for the LinfLsup filter
 
+# ACF No gráfico, identificar um a cada K pontos,
+#     K é variável de entrada, e.g., 500
 ggplot(hc_df, aes(x = H, y = C, color = epoch)) +
   geom_line(data = subset(LinfLsup, Dimension == emb_used & Side == "Lower"),
-            aes(x = H, y = C), color = "grey40", linewidth = 0.6, linetype = "dashed",
+            aes(x = H, y = C), color = "grey40", linewidth = 0.6,
             inherit.aes = FALSE) +
   geom_line(data = subset(LinfLsup, Dimension == emb_used & Side == "Upper"),
             aes(x = H, y = C), color = "grey40", linewidth = 0.6,
             inherit.aes = FALSE) +
   geom_point(size = 3, alpha = 0.85) +
-  geom_text_repel(aes(label = epoch),
-                  size = 3,
-                  fontface = "bold",
-                  max.overlaps = Inf,
-                  box.padding = 0.4,
-                  point.padding = 0.3,
-                  segment.color = "grey60",
-                  segment.size = 0.4,
-                  seed = 42) +
+  # geom_text_repel(aes(label = epoch),
+  #                 size = 3,
+  #                 fontface = "bold",
+  #                 max.overlaps = Inf,
+  #                 box.padding = 0.4,
+  #                 point.padding = 0.3,
+  #                 segment.color = "grey60",
+  #                 segment.size = 0.4,
+  #                 seed = 42) +
   scale_x_continuous(limits = c(min(hc_df$H), max(hc_df$H))) +
   scale_y_continuous(limits = c(min(hc_df$C), max(hc_df$C))) +
   labs(title = "HxC Complexity-Entropy Plane",
@@ -199,3 +204,6 @@ ggplot(hc_df, aes(x = H, y = C, color = epoch)) +
         plot.title = element_text(face = "bold", size = 13),
         plot.subtitle = element_text(color = "grey40", size = 10),
         axis.title = element_text(size = 11))
+
+# ACF Organizar o códig: funções e programas nas respectivas pastas
+#     Salvar os dados na pasta "Data"

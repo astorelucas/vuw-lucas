@@ -71,7 +71,7 @@ print_grid <- function(mat) {
 # Example usage
 # ============================================================
 
-set.seed(42)
+set.seed(123456789, kind="Mersenne-Twister")
 
 # Grid dimensions
 n_rows <- 256
@@ -84,7 +84,7 @@ initial_state <- matrix(
 )
 
 # Run simulation for 20 time steps
-n_steps <- 100
+n_steps <- 3000
 results <- simulate_game_of_life(initial_state, n_steps)
 
 # 'results' is a list of (n_steps + 1) matrices, one per time point (0..n_steps)
