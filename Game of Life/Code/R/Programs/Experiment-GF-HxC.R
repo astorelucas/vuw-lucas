@@ -6,7 +6,7 @@ library(ggthemes)
 # ============================================================
 
 emb_used <- 3  # Embedding dimention
-bits <- 32
+bits <- 8
 seed <- 12345678
 K <- 500  # K = Passo para plot (se K=500 a cada 500 épocas, coloca label no plot)
 N_tail <- 300 # número de épocas para cáculo de (H*,C*)
@@ -63,8 +63,8 @@ ggplot(hc_df, aes(x = H, y = C, color = epoch)) +
                   segment.color = "grey60",
                   segment.size = 0.4,
                   seed = 42) +
-  scale_x_continuous(limits = c(min(hc_df$H), max(hc_df$H))) +
-  scale_y_continuous(limits = c(min(hc_df$C), max(hc_df$C))) +
+  scale_x_continuous(limits = c(0, 1)) +
+  scale_y_continuous(limits = c(0, 0.3)) +
   labs(
        x = "Permutation Entropy (H)",
        y = "Statistical Complexity (C)") +

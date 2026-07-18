@@ -16,7 +16,7 @@ n_rows <- 256
 n_cols <- 256
 n_steps <- 2999
 perturbation_at <- NULL
-p_alive <- 0.3 # percentage_alive in initial_state
+p_alive <- 0.1 # percentage_alive in initial_state
 
 # ------------------------------------------------------------
 # 1. Neighbor counting (toroidal / wrap-around boundary)
