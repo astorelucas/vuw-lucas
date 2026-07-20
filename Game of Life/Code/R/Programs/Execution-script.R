@@ -1,5 +1,5 @@
-emb_dims  <- c(3, 4, 5, 6)
-bits_vals <- c(8, 16, 32, 64)
+emb_dims  <- c(4, 5, 6)
+bits_vals <- c(16, 32, 64)
 epochs_k  <- c(3, 5, 10)
 live_pct  <- c(0.1, 0.3, 0.5, 0.8)
 
