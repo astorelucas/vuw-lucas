@@ -11,6 +11,8 @@ seed <- 12345678
 K <- 500  # K = Passo para plot (se K=500 a cada 500 épocas, coloca label no plot)
 N_tail <- 300 # número de épocas para cáculo de (H*,C*)
 
+results_CAsimulation <- ca_history3k_0.8
+
 # Using Peano-Hilbert trajectory
 hxc_out <-run_gol_hxc_analysis_from_simulation_pht(
   results_CAsimulation, 
@@ -98,6 +100,7 @@ hc_df$dist_to_limit <- sqrt((hc_df$H - H_star)^2 + (hc_df$C - C_star)^2)
 
 # 3) Fit exponential decay: d(t) ~ d0 * exp(-r*t)  ->  log(d) = log(d0) - r*t
 conv_data <- subset(hc_df, dist_to_limit > 1e-8)
+write.csv(conv_data, file = "conv_data.csv")
 fit <- lm(log(dist_to_limit) ~ t, data = conv_data)
 r_rate <- -coef(fit)[["t"]]
 
@@ -137,7 +140,7 @@ ccf_analysis$sig_lags
 
 # Plot distance
 
-plot_dist_to_limit(hc_df, fit_dist = result_analysis$fit_dist)
+plot_dist_to_limit(hc_df)
 
 # ---------------------------------------------------------------
 # Plotting Time Series

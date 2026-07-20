@@ -5,9 +5,8 @@ library(viridis)
 library(StatOrdPattHxC)
 library(patchwork)
 library(dplyr)
+library(png)
 
-if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
-devtools::install_github("labepi/ordinalpatterns")
 # ---------------------------------------------------------------
 # Helper: convert a binary vector to its decimal (real) value.
 # Convention: LAST element is the least significant bit.
@@ -46,14 +45,48 @@ count_neighbors <- function(mat) {
 # ---------------------------------------------------------------
 # Helper: one Game of Life update step (map_{t-1} -> map_t)
 # ---------------------------------------------------------------
-next_generation <- function(mat) {
+next_generation_generic <- function(mat, born, survive) {
   neighbors <- count_neighbors(mat)
-  survive <- (mat == 1) & (neighbors %in% c(2, 3))
-  born    <- (mat == 0) & (neighbors == 3)
+  
+  survive_mask <- (mat == 1) & (neighbors %in% survive)
+  born_mask    <- (mat == 0) & (neighbors %in% born)
   
   new_mat <- matrix(0, nrow = nrow(mat), ncol = ncol(mat))
-  new_mat[survive | born] <- 1
+  new_mat[survive_mask | born_mask] <- 1
   new_mat
+}
+
+game_of_life_rule <- function() {
+  list(
+    born = 3,
+    survive = c(2, 3)
+  )
+}
+
+
+simulate_ca <- function(initial_mat, n_steps) {
+  history <- vector("list", n_steps + 1)
+  history[[1]] <- initial_mat
+  current <- initial_mat
+  
+  parsed <- game_of_life_rule()
+  born <- parsed$born
+  survive <- parsed$survive
+  
+  for (t in 1:n_steps) {
+    current <- next_generation_generic(current, born, survive)
+    
+    history[[t + 1]] <- current
+  }
+  
+  history
+}
+
+make_random_init <- function(n_rows, n_cols, p_alive) {
+  matrix(
+    sample(c(0, 1), n_rows * n_cols, replace = TRUE, prob = c(1 - p_alive, p_alive)),
+    nrow = n_rows, ncol = n_cols
+  )
 }
 
 # ---------------------------------------------------------------
@@ -506,52 +539,6 @@ analyze_ccf_residuals <- function(diag_df, max_lag = 20) {
   )
 }
 
-plot_dist_to_limit <- function(hc_df) {
-  
-  df <- hc_df %>%
-    mutate(epoch = as.numeric(as.character(epoch)))
-  
-  ggplot(df, aes(x = epoch, y = dist_to_limit)) +
-    geom_line(color = "darkorange", linewidth = 0.5) +
-    labs(title = "Distance to H×C boundary over epochs",
-         x = "Epoch", y = "dist_to_limit") +
-    theme_minimal(base_size = 12) +
-    theme(plot.title = element_text(face = "bold"),
-          panel.grid.minor = element_blank())
-}
-
-plot_dist_to_limit <- function(hc_df, fit_dist = NULL, log_scale = FALSE) {
-  
-  df <- hc_df %>%
-    mutate(epoch = as.numeric(as.character(epoch)))
-  
-  p <- ggplot(df, aes(x = epoch, y = dist_to_limit)) +
-    geom_line(color = "darkorange", linewidth = 0.5)
-  
-  if (!is.null(fit_dist)) {
-    df$fit <- exp(predict(fit_dist, newdata = df))
-    p <- p + geom_line(data = df, aes(y = fit),
-                       color = "black", linetype = "dashed", linewidth = 0.6)
-  }
-  
-  p <- p +
-    labs(title = "Distance to H×C boundary over epochs",
-         subtitle = if (!is.null(fit_dist)) "Dashed = exponential fit" else NULL,
-         x = "Epoch", y = "dist_to_limit") +
-    theme_minimal(base_size = 12) +
-    theme(plot.title = element_text(face = "bold"),
-          plot.subtitle = element_text(size = 9, color = "grey40"),
-          panel.grid.minor = element_blank()) +
-  geom_vline(xintercept = 688, linetype = "dotted", color = "grey40") +
-    annotate("text", x = 688, y = max(df$dist_to_limit), label = "half-life", 
-             angle = 90, vjust = -0.5, size = 3, color = "grey40")
-  
-  
-  if (log_scale) p <- p + scale_y_log10()
-  
-  p
-}
-
 plot_dist_to_limit <- function(hc_df, fit_dist = NULL, log_scale = FALSE) {
   
   df <- hc_df %>%
@@ -679,3 +666,24 @@ sensitivity_sweep <- function(hc_df, tau_values = c(50, 100, 200, 400)) {
   
   results
 }
+
+
+# Building video
+
+results_CAsimulation <- ca_history3k_0.8
+
+dir.create("frames_3k_0-8", showWarnings = FALSE)
+
+for (t in seq_along(results_CAsimulation)) {
+  mat <- results_CAsimulation[[t]]
+  img <- array(1 - mat, dim = c(nrow(mat), ncol(mat), 1))
+  writePNG(img, target = sprintf("frames_3k_0-8/frame_%04d.png", t - 1))
+}
+
+# Debuging
+
+mat <- ca_history3k_0.8[[1]]
+
+pct_alive <- 100 * mean(mat == 1)
+cat(sprintf("Alive cells: %.4f%% (%d out of %d)\n",
+            pct_alive, sum(mat == 1), length(mat)))
