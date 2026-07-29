@@ -625,3 +625,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/r,macos,linux,windows,python,jupyternotebooks,latex
 .positai
+
+frames/
