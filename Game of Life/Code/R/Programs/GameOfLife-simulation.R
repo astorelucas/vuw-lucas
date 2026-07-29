@@ -6,7 +6,7 @@ source("Game of Life/Code/R/Programs/Functions.R")
 n_rows <- 1024
 n_cols <- 1024
 n_steps <- 9999
-p_alive <- c(0.1,0.3,0.5,0.8) # percentage_alive in initial_state
+p_alive <- c(0.1,0.3,0.5,0.8 ) # percentage_alive in initial_state
 n_repeticoes <- 100
 epoch <- 10
 
