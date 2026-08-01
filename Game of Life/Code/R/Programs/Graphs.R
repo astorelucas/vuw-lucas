@@ -4,55 +4,42 @@ library(readr)
 library(tidyr)
 install.packages("sp")
 library(sp)
+library(StatOrdPattHxC)
+library(ggrepel)
+library(ggthemes)
+
 
 #palive80dim5bits8
 ## Graph HxC
 
 epoch <- 10
-p_alive <- 0.8
+p_alive <- 0.3
 embdim <- 6
 bits <- 32
-#file <- sprintf("Data/results/%sK/emb5_0.8_16bits/results_%sk_%s_emb%s_%sbits_1.csv", epochs, epochs,p_alive, emb, b, i)
+i<-2
+file <- sprintf("Data/results/%sK/new_results/results_%sk_%sbits_%s_%s.rds", epoch, epoch, bits, p_alive, i)
 
-file <- sprintf("Data/results/%dK/results_%dk_%s_emb%d_%dbits.csv", epoch, epoch, p_alive, embdim, bits)
+#file <- sprintf("Data/results/%dK/results_%dk_%s_emb%d_%dbits.csv", epoch, epoch, p_alive, embdim, bits)
 K <- 2000
 
-hc_df <- read_csv(file, show_col_types = FALSE)
+#hc_df <- read_csv(file, show_col_types = FALSE)
+hc_df <- readRDS(file)
+hc_df <- as.data.frame(hc_df)
 hc_df$epoch <- 1:nrow(hc_df)
 hc_df$epoch <- factor(hc_df$epoch)  # discrete labels/colors, one per epoch
 hc_df$H <- as.numeric(hc_df$H)
 hc_df$C <- as.numeric(hc_df$C)
-hc_df <- hc_df[!is.na(hc_df$H) & !is.na(hc_df$C), ] # remover linhas em que H ou C são NA
+#hc_df <- hc_df[!is.na(hc_df$H) & !is.na(hc_df$C), ] # remover linhas em que H ou C são NA
 hc_df$t <- as.numeric(as.character(hc_df$epoch))
 label_epochs <- unique(c(min(hc_df$t), 
                          hc_df$t[hc_df$t %% K == 0], 
                          max(hc_df$t)))
 hc_df_labels <- subset(hc_df, t %in% label_epochs)
-#hc_df_labels <- hc_df_labels %>%
- # mutate(
-  #  nudge_x = case_when(
-   #   t == 2000 ~ -0.05,
-    #  TRUE ~ 0
-    #),
-    #nudge_y = case_when(
-    #  t == 2000 ~ -0.04,   # empurra o rótulo pra baixo, longe da curva/pontos
-    #  TRUE ~ 0
-    #),
-    #nudge_x = case_when(
-    #  t == 4000 ~ -0.05,
-    #  TRUE ~ 0
-    #),
-    #nudge_y = case_when(
-    #  t == 4000 ~ -0.04,   # empurra o rótulo pra baixo, longe da curva/pontos
-    #  TRUE ~ 0
-    #)
-  #)
-
 ggplot(hc_df, aes(x = H, y = C, color = epoch)) +
-  geom_line(data = subset(LinfLsup, Dimension == emb_used & Side == "Lower"),
+  geom_line(data = subset(LinfLsup, Dimension == embdim & Side == "Lower"),
             aes(x = H, y = C), color = "grey40", linewidth = 0.6,
             inherit.aes = FALSE) +
-  geom_line(data = subset(LinfLsup, Dimension == emb_used & Side == "Upper"),
+  geom_line(data = subset(LinfLsup, Dimension == embdim & Side == "Upper"),
             aes(x = H, y = C), color = "grey40", linewidth = 0.6,
             inherit.aes = FALSE) +
   geom_point(size = 1, alpha = 0.85) +
