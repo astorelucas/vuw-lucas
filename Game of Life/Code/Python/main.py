@@ -20,14 +20,14 @@ else:
 print("Device:", device)
 
 # Parameters
-n_rows = 256
-n_cols = 256
+n_rows = 1024
+n_cols = 1024
 n_steps = 10000
-p_alive = [0.5]
-n_repeticoes = 3
+p_alive = [0.1,0.3,0.5,0.8]
+n_repeticoes = 10
 epoch = 10
 emb = 6
-group_bits = [8]
+group_bits = [8, 16, 32]
 
 coords = hilbert_curve_order(n_rows)
 hi = hilbert_idx(n_cols, coords)

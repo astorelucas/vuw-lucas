@@ -375,23 +375,23 @@ plot_time_series_epoch_faceted <- function(result, hc_df, epoch, n_panels = 4) {
 analyze_convergence <- function(hc_df) {
   df <- hc_df %>%
     filter(!is.na(velocity)) %>%
-    mutate(epoch = as.numeric(as.character(epoch)))
+    mutate(step = as.numeric(as.character(step)))
 
   # sanity check antes de seguir
-  stopifnot(is.numeric(df$epoch))
-  if (any(is.na(df$epoch))) {
+  stopifnot(is.numeric(df$step))
+  if (any(is.na(df$step))) {
     warning(
-      "Some epoch values could not be coerced to numeric — check hc_df$epoch"
+      "Some step values could not be coerced to numeric — check hc_df$step"
     )
   }
 
-  # --- Plot 1: velocity vs epoch ---
-  p_velocity <- ggplot(df, aes(x = epoch, y = velocity)) +
+  # --- Plot 1: velocity vs step ---
+  p_velocity <- ggplot(df, aes(x = step, y = velocity)) +
     geom_line(color = "steelblue", linewidth = 0.4) +
     geom_point(color = "steelblue", size = 0.8, alpha = 0.6) +
     scale_y_log10() +
     labs(
-      title = "Convergence velocity over epochs",
+      title = "Convergence velocity over steps",
       x = "Epoch",
       y = "Velocity (log scale)"
     ) +
@@ -401,8 +401,8 @@ analyze_convergence <- function(hc_df) {
       panel.grid.minor = element_blank()
     )
 
-  # --- Plot 2: dist_to_limit vs epoch ---
-  p_dist <- ggplot(df, aes(x = epoch, y = dist_to_limit)) +
+  # --- Plot 2: dist_to_limit vs step ---
+  p_dist <- ggplot(df, aes(x = step, y = dist_to_limit)) +
     geom_line(color = "darkorange", linewidth = 0.4) +
     geom_point(color = "darkorange", size = 0.8, alpha = 0.6) +
     scale_y_log10() +
@@ -418,17 +418,17 @@ analyze_convergence <- function(hc_df) {
     )
 
   # --- Regressões log-lineares ---
-  fit_dist <- lm(log(dist_to_limit) ~ epoch, data = df)
-  fit_vel <- lm(log(velocity) ~ epoch, data = df)
+  fit_dist <- lm(log(dist_to_limit) ~ step, data = df)
+  fit_vel <- lm(log(velocity) ~ step, data = df)
 
   cat("=== dist_to_limit decay fit ===\n")
   print(summary(fit_dist))
-  cat("\nDecay rate k (dist_to_limit):", -coef(fit_dist)[["epoch"]], "\n")
-  cat("Half-life (epochs):", log(2) / -coef(fit_dist)[["epoch"]], "\n\n")
+  cat("\nDecay rate k (dist_to_limit):", -coef(fit_dist)[["step"]], "\n")
+  cat("Half-life (epochs):", log(2) / -coef(fit_dist)[["step"]], "\n\n")
 
   cat("=== velocity decay fit ===\n")
   print(summary(fit_vel))
-  cat("\nDecay rate k (velocity):", -coef(fit_vel)[["epoch"]], "\n")
+  cat("\nDecay rate k (velocity):", -coef(fit_vel)[["step"]], "\n")
 
   df$dist_fit <- exp(predict(fit_dist))
   p_dist <- p_dist +
@@ -439,6 +439,7 @@ analyze_convergence <- function(hc_df) {
       linetype = "dashed",
       linewidth = 0.5
     )
+  p_dist
 
   df$vel_fit <- exp(predict(fit_vel))
   p_velocity <- p_velocity +
@@ -449,6 +450,7 @@ analyze_convergence <- function(hc_df) {
       linetype = "dashed",
       linewidth = 0.5
     )
+  p_velocity
 
   combined <- p_velocity /
     p_dist +
@@ -743,6 +745,7 @@ plot_dist_to_limit <- function(hc_df, fit_dist = NULL, log_scale = FALSE) {
 # 1. Find the smallest tau for which the final tau epochs are
 #    stationary (ADF test), searching over a grid of candidate taus.
 # ---------------------------------------------------------------
+
 find_tau_stationary <- function(
   hc_df,
   tau_grid = seq(300, 1500, by = 100),
