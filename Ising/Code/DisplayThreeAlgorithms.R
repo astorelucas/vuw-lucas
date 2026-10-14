@@ -1,5 +1,8 @@
 L <- 512
-beta <- log(1+sqrt(2))/2
+
+fator <- .95 # fator de escala para a temperatura
+beta <- log(1+sqrt(2))/2 * fator # a recíproca da temperatura
+
 
 # Same initial condition
 initial <- matrix(
@@ -24,7 +27,7 @@ plot_spin <- function(spins, main = "") {
 # Open one graphics device
 quartz(width = 12, height = 4)
 
-for (t in 1:10000) {
+for (t in 1:1000) {
   
   spins_MH <- metropolis_step(spins_MH, beta)
   spins_GB <- gibbs_step(spins_GB, beta)
