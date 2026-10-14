@@ -64,7 +64,11 @@ ggplot(hc_df, aes(x = H, y = C, color = epoch)) +
   scale_x_continuous(limits = c(0, 1)) +
   scale_y_continuous(limits = c(0, 0.5)) +
   labs(
-    title = sprintf("%dk generations | p(alive) = %d%%  |  dim = %d  |  bits = %d",epoch, p_alive*100, embdim, bits),
+    title = bquote(
+      .(epoch) * "k generations | " * 
+        rho[0] == .(p_alive * 100) * "% | dim = " * 
+        .(embdim) * " | bits = " * .(bits)
+    ),
     x = "Permutation Entropy (H)",
     y = "Statistical Complexity (C)") +
   theme_tufte() +

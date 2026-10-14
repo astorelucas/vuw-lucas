@@ -174,55 +174,57 @@ ggplot(summary_results,
 
 
 summary_results <- tibble()
-epochs <- c(3, 5, 10)
+epochs <- c(3, 10)
 embeddings <- c(3, 4, 5, 6)
 bits <- c(2, 4, 8, 16, 32)
 p_alive_vals <- c(0.1, 0.3, 0.5, 0.8)
+rep <- c(1,2,3,4,5)
 
 for (ep in epochs) {
   for (pa in p_alive_vals) {
     for (emb in embeddings) {
       for (b in bits) {
+        for (r in rep){
         
-        file <- sprintf(
-          "Data/results/%sK/thimming results/results_%sk_%s_emb%s_%sbits.csv",
-          ep, ep, pa, emb, b
-        )
-        
-        df <- read_csv(file, show_col_types = FALSE)
-        
-        if ("step" %in% names(df)) {
-          df <- rename(df, "epoch" = "step")
-        }
-        
-        
-        if (pa != 0.8){
-          step_min <- which.min(df$H)
-          minH <- min(df$H)
-          
-          step_max <- max(df$epoch)
-          step_last <- df[df$epoch == step_max, "H"] %>% pull(H)  # valor do H no último passo
-        }else{
-          step_min <- which.max(df$H)
-          minH <- max(df$H)
-          
-          step_max <- max(df$epoch)
-          step_last <- df[df$epoch == step_max, "H"] %>% pull(H)  # valor do H no último passo
-        }
-        
-        summary_results <- bind_rows(
-          summary_results,
-          tibble(
-            epoch = factor(ep),
-            p_alive = factor(pa),
-            embedding = factor(emb),
-            bits = factor(b),
-            step_last = step_last,
-            step_max = step_max,
-            min_H = minH,
-            step_min_H = step_min
+          file <- sprintf(
+            "Data/results/%sK/thimming results/emb%s/results_%sk_%sbits_%s_%s.csv",
+            ep, emb, ep, b, pa, r
           )
-        )
+          
+          df <- read_csv(file, show_col_types = FALSE)
+          
+          if ("step" %in% names(df)) {
+            df <- rename(df, "epoch" = "step")
+          }
+          
+          if (pa != 0.8){
+            step_min <- which.min(df$H)
+            minH <- min(df$H)
+            
+            step_max <- max(df$epoch)
+            step_last <- df[df$epoch == step_max, "H"] %>% pull(H)  # valor do H no último passo
+          }else{
+            step_min <- which.max(df$H)
+            minH <- max(df$H)
+            
+            step_max <- max(df$epoch)
+            step_last <- df[df$epoch == step_max, "H"] %>% pull(H)  # valor do H no último passo
+          }
+          
+          summary_results <- bind_rows(
+            summary_results,
+            tibble(
+              epoch = factor(ep),
+              p_alive = factor(pa),
+              embedding = factor(emb),
+              bits = factor(b),
+              step_last = step_last,
+              step_max = step_max,
+              min_H = minH,
+              step_min_H = step_min
+            )
+          )
+        }
       }
     }
   }
@@ -284,7 +286,7 @@ p_r2 <- ggplot(sens_df, aes(x = upsilon, y = r_squared, color = LC, group = LC))
   annotate("label", x = upsilon_chosen, y = min(sens_df$r_squared) + 0.02,
            label = paste0("", "\U03C5", " = ", upsilon_chosen),
            size = 3.2, hjust = -0.05, label.size = 0, fill = "white") +
-  labs(x = expression(upsilon), y = expression(R^2), color = "LC") +
+  labs(x = expression(upsilon), y = expression(R^2), color = expression(rho[0])) +
   theme_tufte() +
   theme(
     axis.title = element_text(size = 14),
@@ -324,7 +326,7 @@ combined_plot
 # ----------
 
 summary_results <- tibble()
-epochs <- c(3, 5, 10)
+epochs <- c(3, 10)
 embeddings <- c(3, 4, 5, 6)
 bits <- c(2, 4, 8, 16, 32)
 p_alive_vals <- c(0.1, 0.3, 0.5, 0.8)
@@ -335,8 +337,8 @@ for (ep in epochs) {
       for (b in bits) {
         
         file <- sprintf(
-          "Data/results/%sK/thimming results/results_%sk_%s_emb%s_%sbits.csv",
-          ep, ep, pa, emb, b
+          "Data/results/%sK/thimming results/emb%s/results_%sk_%sbits_%s_%s.csv",
+          ep, emb, ep, b, pa, r
         )
         
         df <- read_csv(file, show_col_types = FALSE)

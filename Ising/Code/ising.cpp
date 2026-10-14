@@ -101,9 +101,10 @@ double ising_magnetization(IntegerMatrix spins){
 
 // [[Rcpp::export]]
 IntegerMatrix metropolis_step(
-    IntegerMatrix spins,
+    IntegerMatrix spins_in,
     double beta,
     double J=1.0){
+  IntegerMatrix spins = clone(spins_in);
 
   int L = spins.nrow();
 
@@ -137,9 +138,10 @@ IntegerMatrix metropolis_step(
 
 // [[Rcpp::export]]
 IntegerMatrix gibbs_step(
-    IntegerMatrix spins,
+    IntegerMatrix spins_in,
     double beta,
     double J=1.0){
+  IntegerMatrix spins = clone(spins_in);
 
   int L = spins.nrow();
 

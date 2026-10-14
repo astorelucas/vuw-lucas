@@ -3,7 +3,7 @@ p_alive <- 0.5
 embdim <- 6
 bits <- 32
 i<-2
-N_tail <- 1000
+N_tail <- 3000
 
 file <- sprintf("Data/results/%sK/new_results/emb6/results_%sk_%sbits_%s_%s.csv", epoch, epoch, bits, p_alive, i)
 

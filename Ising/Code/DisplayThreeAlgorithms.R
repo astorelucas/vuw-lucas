@@ -1,4 +1,4 @@
-L <- 1024
+L <- 512
 beta <- log(1+sqrt(2))/2
 
 # Same initial condition
