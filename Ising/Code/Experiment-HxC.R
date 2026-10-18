@@ -11,14 +11,14 @@ source(here("Code", "Functions.R"))
 # ------------------------------------------------------------
 
 beta_vals   <- c(log(1 + sqrt(2)) / 2) * 1.05
-generations <- c(100)
+generations <- c(1000)
 methods     <- c("GB", "MH", "SW")
 L           <- 512L
 
 # Variáveis referentes aos padrões ordinais
 embdim <- c(6)
 bits   <- c(16)
-seed  <- 1000 
+seed  <- 1000-99-01
 
 step_fun <- list(MH = metropolis_step,
                  GB = gibbs_step,
@@ -29,7 +29,7 @@ coords  <- 0:(L * L - 1L)                 # distâncias d ao longo da curva
 
 # Same initial condition
 initial <- matrix(
-  sample(c(-1L, 1L), L * L, replace = TRUE, prob = c(0.9, 0.10)),
+  sample(c(-1L, 1L), L * L, replace = TRUE, prob = c(0.999999, 1-0.999999)),
   nrow = L, ncol = L
 )
 
@@ -54,7 +54,6 @@ for (im in seq_along(methods)) {
     beta    <- beta_vals[ib]
     run_dir <- file.path(out_dir, m, sprintf("beta%.4f", beta))
     
-    # o último arquivo é escrito por último: se existe, a execução terminou
     last <- combos[nrow(combos), ]
     if (file.exists(combo_file(run_dir, last$embdim, last$bits))) {
       message("Pulando (já existe): ", m, " beta = ", sprintf("%.4f", beta))
@@ -62,15 +61,17 @@ for (im in seq_along(methods)) {
     }
     dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
     
-    message(sprintf("Rodando %s, beta = %.4f", m, beta))
+    message(sprintf("Rodando %s, beta = %.4f (%d/%d métodos, %d/%d betas)",
+                    m, beta, im, length(methods), ib, length(beta_vals)))
     t0 <- Sys.time()
     set.seed(seed + 1000 * im + ib)
     spins <- initial + 0L
     
-    # uma coluna por combinação (embdim, bits), uma linha por geração registrada
     H_mat <- matrix(NA_real_, length(gens_rec), nrow(combos))
     C_mat <- matrix(NA_real_, length(gens_rec), nrow(combos))
     r <- 0L
+    
+    pb <- txtProgressBar(min = 0, max = max_gen, style = 3)
     
     for (g in 0:max_gen) {
       if (g > 0) spins <- step(spins, beta)
@@ -90,7 +91,9 @@ for (im in seq_along(methods)) {
           C_mat[r, ic] <- hc[["C"]]
         }
       }
+      setTxtProgressBar(pb, g)
     }
+    close(pb)
     
     # um CSV por combinação, só com generation, H, C
     message(sprintf("Salvando %s, beta = %.2f, embdim = %d, bits = %d", m, beta, combos$embdim[ic], combos$bits[ic]))
@@ -114,4 +117,3 @@ for (im in seq_along(methods)) {
                 append = file.exists(info_file))
   }
 }
-
