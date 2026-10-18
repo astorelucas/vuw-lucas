@@ -2,7 +2,6 @@ library(ggplot2)
 library(ggrepel)
 library(ggthemes)
 library(viridis)
-library(StatOrdPattHxC)
 library(patchwork)
 library(dplyr)
 library(png)
@@ -90,7 +89,7 @@ run_hxc_from_simulation_ph <- function(
   n_maps <- length(maps)
   n      <- nrow(maps[[1]])
   
-  if (is.null(order_coords)) order_coords <- hilbert_curve_order(n)
+  #if (is.null(order_coords)) order_coords <- hilbert_curve_order(n)
   n_total <- nrow(order_coords)
   stopifnot(n_total %% group_size == 0)
   

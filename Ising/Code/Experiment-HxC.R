@@ -9,15 +9,16 @@ source(here("Code", "Functions.R"))
 # ------------------------------------------------------------
 # Variáveis referentes à simulação
 # ------------------------------------------------------------
-seed        <- 1000
-beta_vals   <- c(0, 0.2, log(1 + sqrt(2)) / 2, 0.5, 1)
-generations <- c(1000)
+
+beta_vals   <- c(log(1 + sqrt(2)) / 2) * 1.05
+generations <- c(100)
 methods     <- c("GB", "MH", "SW")
 L           <- 512L
 
 # Variáveis referentes aos padrões ordinais
-embdim <- c(3, 4, 5, 6)
-bits   <- c(8, 16, 32)
+embdim <- c(6)
+bits   <- c(16)
+seed  <- 1000 
 
 step_fun <- list(MH = metropolis_step,
                  GB = gibbs_step,
@@ -25,10 +26,14 @@ step_fun <- list(MH = metropolis_step,
 
 order_coords <- hilbert_curve_order(L)
 coords  <- 0:(L * L - 1L)                 # distâncias d ao longo da curva
-hi      <- hilbert_d2xy(L, coords)        # matriz (L*L) x 2, colunas x e y
-n_total <- nrow(hi)                       # no lugar de length(hi)
 
-out_dir <- here("Data", "Results", sprintf("seed%d", seed))
+# Same initial condition
+initial <- matrix(
+  sample(c(-1L, 1L), L * L, replace = TRUE, prob = c(0.9, 0.10)),
+  nrow = L, ncol = L
+)
+
+out_dir <- here("Results", sprintf("seed%s", seed))
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 saveRDS(initial, file.path(out_dir, sprintf("initial_seed%d.rds", seed)))
 
