@@ -6,9 +6,10 @@ beta <- log(1+sqrt(2))/2 * fator # a recíproca da temperatura
 
 # Same initial condition
 initial <- matrix(
-  sample(c(-1L, 1L), L * L, replace = TRUE),
-  L, L
+  sample(c(-1L, 1L), L * L, replace = TRUE, prob = c(0.999999, 1-0.999999)),
+  nrow = L, ncol = L
 )
+
 
 spins_MH <- initial
 spins_GB <- initial
@@ -27,11 +28,8 @@ plot_spin <- function(spins, main = "") {
 # Open one graphics device
 quartz(width = 12, height = 4)
 
-for (t in 1:1000) {
+for (t in 1:1) {
   
-  spins_MH <- metropolis_step(spins_MH, beta)
-  spins_GB <- gibbs_step(spins_GB, beta)
-  spins_SW <- swendsen_wang_step(spins_SW, beta)
   
   par(
     mfrow = c(1, 3),
@@ -53,5 +51,8 @@ for (t in 1:1000) {
     sprintf("Swendsen-Wang\nSweep %d", t)
   )
   
+  spins_MH <- metropolis_step(spins_MH, beta)
+  spins_GB <- gibbs_step(spins_GB, beta)
+  spins_SW <- swendsen_wang_step(spins_SW, beta)
   Sys.sleep(1)
 }

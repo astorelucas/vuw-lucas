@@ -9,10 +9,10 @@ method_names <- c(MH = "Metropolis", GB = "Gibbs", SW = "Swendsen-Wang")
 
 emb <- 6
 bits <- 16
-beta_vals <- (0.4627)
+beta_vals <- (0.6610)
 
 for (b in beta_vals) {
-  p <- plot_hxc_methods(b, emb = emb, bits = bits, root = here("Results/seed1000-99-01/"))
+  p <- plot_hxc_methods(b, emb = emb, bits = bits, root = here("Results/seed1000-99-01-15"))
   ggsave(here("Figures",
               sprintf("hxc_methods_beta%.2f_emb%d_%dbits.png", b, emb, bits)),
          p, width = 15, height = 5, dpi = 400, bg = "white")

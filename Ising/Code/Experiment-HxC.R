@@ -10,7 +10,7 @@ source(here("Code", "Functions.R"))
 # Variáveis referentes à simulação
 # ------------------------------------------------------------
 
-beta_vals   <- c(log(1 + sqrt(2)) / 2) * 1.05
+beta_vals   <- c(log(1 + sqrt(2)) / 2) * 1.5
 generations <- c(1000)
 methods     <- c("GB", "MH", "SW")
 L           <- 512L
@@ -18,7 +18,7 @@ L           <- 512L
 # Variáveis referentes aos padrões ordinais
 embdim <- c(6)
 bits   <- c(16)
-seed  <- 1000-99-01
+seed  <- "1000-99-01-1.5"
 
 step_fun <- list(MH = metropolis_step,
                  GB = gibbs_step,
@@ -45,7 +45,7 @@ gens_rec     <- seq(0, max_gen, by = record_every)
 combo_file <- function(run_dir, e, b) {
   file.path(run_dir, sprintf("emb%d_bits%d.csv", e, b))
 }
-
+seed <- 901
 for (im in seq_along(methods)) {
   m    <- methods[im]
   step <- step_fun[[m]]
