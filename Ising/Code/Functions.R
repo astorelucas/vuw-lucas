@@ -5,6 +5,7 @@ library(viridis)
 library(patchwork)
 library(dplyr)
 library(png)
+library(StatOrdPattHxC)
 library(ordinalpatterns)
 
 plot_hxc_methods <- function(beta, emb, bits,

@@ -20,6 +20,12 @@ embdim <- c(6)
 bits   <- c(16)
 seed  <- 987654321
 
+snapshot_gens <- sort(unique(c(
+  0:10,                          # 0, 1, 2, ..., 10
+  100,
+  seq(10000, 500000, by = 10000) # 10k, 20k, ..., 500k
+)))
+
 step_fun <- list(MH = metropolis_step,
                  GB = gibbs_step,
                  SW = swendsen_wang_step)
@@ -46,6 +52,7 @@ combo_file <- function(run_dir, e, b) {
   file.path(run_dir, sprintf("emb%d_bits%d.csv", e, b))
 }
 
+
 for (im in seq_along(methods)) {
   m    <- methods[im]
   step <- step_fun[[m]]
@@ -53,13 +60,16 @@ for (im in seq_along(methods)) {
   for (ib in seq_along(beta_vals)) {
     beta    <- beta_vals[ib]
     run_dir <- file.path(out_dir, m, sprintf("beta%.4f", beta))
+    snap_dir <- file.path(run_dir, "spins")
     
+    # o último arquivo é escrito por último: se existe, a execução terminou
     last <- combos[nrow(combos), ]
     if (file.exists(combo_file(run_dir, last$embdim, last$bits))) {
       message("Pulando (já existe): ", m, " beta = ", sprintf("%.4f", beta))
       next
     }
-    dir.create(run_dir, recursive = TRUE, showWarnings = FALSE)
+    dir.create(run_dir,  recursive = TRUE, showWarnings = FALSE)
+    dir.create(snap_dir, recursive = TRUE, showWarnings = FALSE)
     
     message(sprintf("Rodando %s, beta = %.4f (%d/%d métodos, %d/%d betas)",
                     m, beta, im, length(methods), ib, length(beta_vals)))
@@ -67,6 +77,7 @@ for (im in seq_along(methods)) {
     set.seed(seed + 1000 * im + ib)
     spins <- initial + 0L
     
+    # uma coluna por combinação (embdim, bits), uma linha por geração registrada
     H_mat <- matrix(NA_real_, length(gens_rec), nrow(combos))
     C_mat <- matrix(NA_real_, length(gens_rec), nrow(combos))
     r <- 0L
@@ -75,6 +86,11 @@ for (im in seq_along(methods)) {
     
     for (g in 0:max_gen) {
       if (g > 0) spins <- step(spins, beta)
+      
+      # salva o estado da rede nas gerações escolhidas
+      if (g %in% snapshot_gens) {
+        saveRDS(spins, file.path(snap_dir, sprintf("spins_gen%06d.rds", g)))
+      }
       
       if (g %% record_every == 0) {
         r <- r + 1L
@@ -96,7 +112,7 @@ for (im in seq_along(methods)) {
     close(pb)
     
     # um CSV por combinação, só com generation, H, C
-    message(sprintf("Salvando %s, beta = %.2f, embdim = %d, bits = %d", m, beta, combos$embdim[ic], combos$bits[ic]))
+    message(sprintf("Salvando %s, beta = %.4f", m, beta))
     for (ic in seq_len(nrow(combos))) {
       write.csv(
         data.frame(generation = gens_rec, H = H_mat[, ic], C = C_mat[, ic]),
