@@ -10,15 +10,15 @@ source(here("Code", "Functions.R"))
 # Variáveis referentes à simulação
 # ------------------------------------------------------------
 
-beta_vals   <- c(log(1 + sqrt(2)) / 2) * 1.5
-generations <- c(1000)
+beta_vals   <- c(log(1 + sqrt(2)) / 2) * 2
+generations <- c(500000)
 methods     <- c("GB", "MH", "SW")
 L           <- 512L
 
 # Variáveis referentes aos padrões ordinais
 embdim <- c(6)
 bits   <- c(16)
-seed  <- "1000-99-01-1.5"
+seed  <- 987654321
 
 step_fun <- list(MH = metropolis_step,
                  GB = gibbs_step,
@@ -29,7 +29,7 @@ coords  <- 0:(L * L - 1L)                 # distâncias d ao longo da curva
 
 # Same initial condition
 initial <- matrix(
-  sample(c(-1L, 1L), L * L, replace = TRUE, prob = c(0.999999, 1-0.999999)),
+  sample(c(-1L, 1L), L * L, replace = TRUE, prob = c(0.5, 0.5)),
   nrow = L, ncol = L
 )
 
@@ -45,7 +45,7 @@ gens_rec     <- seq(0, max_gen, by = record_every)
 combo_file <- function(run_dir, e, b) {
   file.path(run_dir, sprintf("emb%d_bits%d.csv", e, b))
 }
-seed <- 901
+
 for (im in seq_along(methods)) {
   m    <- methods[im]
   step <- step_fun[[m]]
