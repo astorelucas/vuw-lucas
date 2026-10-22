@@ -1,0 +1,58 @@
+---
+title: "FromClaude-Criticality"
+output: html_document
+---
+
+In the Ising model, criticality is the special point where the system sits exactly on the boundary between its ordered and disordered phases, and where its behavior becomes scale-free.
+
+**The setup**
+
+Spins s_i = ±1 on a lattice interact with their neighbors through the energy E = −J Σ s_i s_j. At low temperature the spins align and the system has a net magnetization (ordered phase). At high temperature thermal noise wins and the magnetization averages to zero (disordered phase). In two dimensions and above, these are separated by a sharp phase transition at the critical temperature T_c. For the 2D square lattice, Onsager's exact result gives T_c = 2J / ln(1+√2) ≈ 2.269 J/k_B. In 1D there is no finite-temperature transition.
+
+**What happens at criticality**
+
+- **The correlation length diverges.** Away from T_c, correlations between spins decay exponentially over a finite length ξ. As T → T_c, ξ ~ |T − T_c|^(−ν), and at T_c it is limited only by the system size. Fluctuations occur on all scales, with clusters of aligned spins of every size, including ones as large as the lattice itself.
+- **Power-law correlations.** At T_c the spin-spin correlation decays as a power law, G(r) ~ r^−(d−2+η), rather than exponentially.
+- **Scale invariance.** Snapshots look statistically similar under zooming in or out (self-similar, fractal-like clusters).
+- **Singular thermodynamics with critical exponents.** The magnetization vanishes as M ~ (T_c − T)^β, the susceptibility diverges as χ ~ |T − T_c|^(−γ), and the specific heat diverges as C ~ |T − T_c|^(−α) (logarithmically in 2D). For the 2D Ising model: β = 1/8, γ = 7/4, ν = 1, η = 1/4.
+- **Universality.** The exponents depend only on the dimension and symmetry of the model, not on microscopic details, so very different systems share them.
+
+**Why it matters for simulation**
+
+1. **Critical slowing down.** The autocorrelation time of local-update algorithms such as Metropolis or Glauber grows as τ ~ ξ^z with z ≈ 2.17 in 2D. Near T_c, single-spin flips decorrelate the configuration very slowly, so samples are strongly correlated and statistical errors are large. Cluster algorithms (Swendsen–Wang, Wolff) flip whole correlated clusters and reduce z to roughly 0.2–0.35, which is why they are standard near T_c.
+2. **Finite-size effects.** On a finite lattice of linear size L nothing truly diverges. Peaks in χ and C grow with L and shift with it, and you extract the exponents by finite-size scaling, for example χ_max ~ L^(γ/ν), M(T_c) ~ L^(−β/ν).
+3. **Locating T_c.** A common approach is the Binder cumulant U = 1 − ⟨M⁴⟩/(3⟨M²⟩²). Curves for different L cross at T_c, which gives a precise estimate without knowing the exponents in advance. Data collapse of rescaled observables confirms the exponents.
+4. **Diagnostics.** Typical signatures in a simulation are a peak in susceptibility and heat capacity, a magnetization histogram changing from double-peaked (ordered) to single-peaked (disordered), and large, fractal clusters in snapshots.
+
+**Intuition via the renormalization group**
+
+Coarse-graining the lattice (blocking spins and rescaling) flows toward fixed points. The critical point is the unstable fixed point where the system looks the same at every scale. This explains both scale invariance and universality, since microscopic details are irrelevant perturbations that flow away.
+
+With three samplers on a 1024×1024 lattice, the most informative comparisons contrast the algorithms at the same temperatures, and use the large lattice for spatial structure, where it has an advantage.
+
+**1. Same temperatures, three algorithms (snapshots)**
+Show T < T_c, T = T_c and T > T_c side by side. Start from a random configuration and quench to T_c, then show the state after a fixed number of sweeps. Metropolis and Gibbs coarsen slowly and leave domains of limited size, while Swendsen-Wang reaches a critical-looking state within a few sweeps. This makes critical slowing down visible without any statistics.
+
+**2. Time series and autocorrelation at T_c**
+Plot |M| (or the energy) against sweeps for each sampler, then the autocorrelation function and the integrated autocorrelation time τ. Expect z ≈ 2.17 for the local updates and z ≈ 0.25 for SW. At L = 1024, Metropolis needs on the order of 10⁶ sweeps to decorrelate, so a clean τ estimate there is expensive. A better way is to measure τ for L = 16, 32, …, 256 and fit τ ~ L^z, then use 1024 only for the snapshots and spatial statistics. Also compare cost per independent sample (CPU time × τ), since an SW sweep is more expensive but wins near T_c and may lose far from it.
+
+**3. Validation against exact results**
+Plot ⟨|M|⟩, energy per spin, specific heat and susceptibility against T, with Onsager's energy and Yang's magnetization M = (1 − sinh⁻⁴(2J/k_BT))^(1/8) overlaid. At L = 1024 the rounding is small (ξ reaches L only for |T − T_c|/T_c of order 10⁻³), so the curves hug the exact ones, with the specific heat showing a logarithmic peak.
+
+**4. Spatial correlations**
+Compute G(r) via FFT using the periodic boundaries. At T_c a log-log plot should show slope −η = −1/4, while off-critical curves bend into exponentials from which you can read ξ(T). The large lattice gives more than two decades in r, which is hard to get on small systems.
+
+**5. Cluster geometry**
+SW gives you Fortuin–Kasteleyn clusters for free. At T_c the cluster-size distribution is a power law, with fractal dimension 15/8 (= d − β/ν). Plotting the ordinary spin (geometric) clusters is a good contrast: they have a different fractal dimension, 187/96 ≈ 1.948, which surprises students because both cluster types look similar. Colouring the largest cluster in snapshots makes a striking figure.
+
+**6. Scale invariance made visible**
+Block-coarsen the 1024² lattice by majority rule (1024 → 512 → 256 → 128). At T_c the pictures look statistically alike across scales, while at T ≠ T_c they flow toward all-up/down or noise. This is a direct, intuitive demonstration of the renormalization group picture. You can also estimate exponents from a single large run by computing ⟨M²⟩ and ⟨M⁴⟩ over sub-blocks of size ℓ and checking ⟨M²⟩ ~ ℓ^(−2β/ν).
+
+**7. Binder cumulant crossing**
+Use the sub-block or multi-L approach to show U = 1 − ⟨M⁴⟩/(3⟨M²⟩²) curves crossing at T_c, with U* ≈ 0.61 for the periodic square lattice. A data collapse of χ/L^(γ/ν) against (T − T_c)L^(1/ν) with 7/4 and 1 is a nice final check.
+
+**8. Metropolis vs Gibbs specifically**
+Since both are local, they share the same z, so the interesting differences are acceptance rate versus T and the constant prefactor in τ. Show these rather than expecting a qualitative difference.
+
+If this is for teaching, I'd pick 1, 2 (with the τ ~ L^z fit), 5 and 6: they tell the story of "why criticality is hard, why it is beautiful, and how cluster algorithms fix it." I can sketch the plotting or analysis code for any of these if you'd like.
+
